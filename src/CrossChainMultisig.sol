@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.20;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract CrossChainMultisig {
     //////////////
     //  TYPES   //
@@ -9,8 +11,9 @@ contract CrossChainMultisig {
 
     struct Transaction {
         address destination;
+        address token;
         uint64 destinationChainSelector;
-        uint256 value;
+        uint256 amount;
         uint256 numberOfConfirmations;
         bytes data;
         bool executed;
@@ -119,15 +122,17 @@ contract CrossChainMultisig {
 
     function createTransaction(
         address _destination,
+        address _token,
         uint64 _destinationChainSelector,
-        uint256 _value,
+        uint256 _amount,
         bytes memory _data,
         bool _executesOnRequirementMet
     ) public onlyOwner(msg.sender) {
         _createTransaction(
             _destination,
+            _token,
             _destinationChainSelector,
-            _value,
+            _amount,
             _data,
             _executesOnRequirementMet
         );
@@ -189,16 +194,18 @@ contract CrossChainMultisig {
 
     function _createTransaction(
         address _destination,
+        address _token,
         uint64 _destinationChainSelector,
-        uint256 _value,
+        uint256 _amount,
         bytes memory _data,
         bool _executesOnRequirementMet
     ) internal {
         s_transactions.push(
             Transaction({
                 destination: _destination,
+                token: _token,
                 destinationChainSelector: _destinationChainSelector,
-                value: _value,
+                amount: _amount,
                 numberOfConfirmations: 0,
                 data: _data,
                 executed: false,
@@ -207,7 +214,7 @@ contract CrossChainMultisig {
         );
         emit TransactionCreated(
             _destination,
-            _value,
+            _amount,
             _destinationChainSelector,
             _data
         );
@@ -232,13 +239,20 @@ contract CrossChainMultisig {
     function _executeTransaction(uint256 _transactionId) internal {
         Transaction storage transaction = s_transactions[_transactionId];
         transaction.executed = true;
-        (bool success, ) = transaction.destination.call{
-            value: transaction.value
-        }(transaction.data);
-        if (!success) {
-            revert CrossChainMultisig__TransactionExecutionFailed(
-                _transactionId
+        if (transaction.token != address(0)) {
+            IERC20(transaction.token).transfer(
+                transaction.destination,
+                transaction.amount
             );
+        } else {
+            (bool success, ) = transaction.destination.call{
+                value: transaction.amount
+            }(transaction.data);
+            if (!success) {
+                revert CrossChainMultisig__TransactionExecutionFailed(
+                    _transactionId
+                );
+            }
         }
         emit TransactionExecuted(_transactionId);
     }
