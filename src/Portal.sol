@@ -7,7 +7,7 @@ import {IERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-sol
 import {SafeERC20} from "@chainlink/contracts-ccip/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/utils/SafeERC20.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 
-contract CrossChainSender {
+contract Portal {
     using SafeERC20 for IERC20;
 
     //////////////
@@ -50,11 +50,11 @@ contract CrossChainSender {
     //  ERRORS  //
     //////////////
 
-    error CrossChainMultisig__NotOwner(address account);
-    error CrossChainMultisig__DestinationChainNotAllowlisted(
+    error PortalSig__NotOwner(address account);
+    error PortalSig__DestinationChainNotAllowlisted(
         uint64 destinationChainSelector
     );
-    error CrossChainMultisig__NotEnoughBalanceForFees(
+    error PortalSig__NotEnoughBalanceForFees(
         uint256 currentBalance,
         uint256 calculatedFees
     );
@@ -138,7 +138,7 @@ contract CrossChainSender {
 
         if (_payFeesIn == PayFeesIn.LINK) {
             if (fees > i_link.balanceOf(address(this)))
-                revert CrossChainMultisig__NotEnoughBalanceForFees(
+                revert PortalSig__NotEnoughBalanceForFees(
                     i_link.balanceOf(address(this)),
                     fees
                 );
@@ -154,7 +154,7 @@ contract CrossChainSender {
             );
         } else {
             if (fees > address(this).balance)
-                revert CrossChainMultisig__NotEnoughBalanceForFees(
+                revert PortalSig__NotEnoughBalanceForFees(
                     address(this).balance,
                     fees
                 );
@@ -181,15 +181,13 @@ contract CrossChainSender {
 
     function _ensureOwnership(address _owner) internal view {
         if (!isOwner(_owner)) {
-            revert CrossChainMultisig__NotOwner(_owner);
+            revert PortalSig__NotOwner(_owner);
         }
     }
 
     function _ensureWhiteListedChain(uint64 _chainSelector) internal view {
         if (!allowlistedDestinationChains[_chainSelector]) {
-            revert CrossChainMultisig__DestinationChainNotAllowlisted(
-                _chainSelector
-            );
+            revert PortalSig__DestinationChainNotAllowlisted(_chainSelector);
         }
     }
 

@@ -3,9 +3,9 @@
 pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {CrossChainSender} from "./CrossChainSender.sol";
+import {Portal} from "./Portal.sol";
 
-contract CrossChainMultisig is CrossChainSender {
+contract PortalSig is Portal {
     //////////////
     //  TYPES   //
     //////////////
@@ -61,22 +61,20 @@ contract CrossChainMultisig is CrossChainSender {
     //  ERRORS  //
     //////////////
 
-    error CrossChainMultisig__NeedAtLeastTwoOwners(uint256 ownersLength);
-    error CrossChainMultisig__InvalidOwnerAddress();
-    error CrossChainMultisig__OwnerNotUnique();
-    error CrossChainMultisig__InvalidTransactionId(uint256 transactionId);
-    error CrossChainMultisig__AlreadyExecuted(uint256 transactionId);
-    error CrossChainMultisig__AlreadyConfirmed(uint256 transactionId);
-    error CrossChainMultisig__NotEnoughConfirmations(uint256 transactionId);
-    error CrossChainMultisig__TransactionExecutionFailed(uint256 transactionId);
-    error CrossChainMultisig__NotConfirmed(uint256 transactionId);
-    error CrossChainMultisig__RequiredConfirmationsGreaterThanOwnersLength(
+    error PortalSig__NeedAtLeastTwoOwners(uint256 ownersLength);
+    error PortalSig__InvalidOwnerAddress();
+    error PortalSig__OwnerNotUnique();
+    error PortalSig__InvalidTransactionId(uint256 transactionId);
+    error PortalSig__AlreadyExecuted(uint256 transactionId);
+    error PortalSig__AlreadyConfirmed(uint256 transactionId);
+    error PortalSig__NotEnoughConfirmations(uint256 transactionId);
+    error PortalSig__TransactionExecutionFailed(uint256 transactionId);
+    error PortalSig__NotConfirmed(uint256 transactionId);
+    error PortalSig__RequiredConfirmationsGreaterThanOwnersLength(
         uint256 requiredConfirmations,
         uint256 ownersLength
     );
-    error CrossChainMultisig__InvalidConfirmationAmount(
-        uint256 requiredConfirmations
-    );
+    error PortalSig__InvalidConfirmationAmount(uint256 requiredConfirmations);
 
     /////////////////
     //  MODIFIERS  //
@@ -101,7 +99,7 @@ contract CrossChainMultisig is CrossChainSender {
         uint256 _requiredConfirmationsAmount,
         address _ccipRouterAddress,
         address _linkAddress
-    ) CrossChainSender(_ccipRouterAddress, _linkAddress) {
+    ) Portal(_ccipRouterAddress, _linkAddress) {
         _ensureMultisigValidity(_owners, _requiredConfirmationsAmount);
         _registerOwners(_owners);
         i_requiredConfirmationsAmount = _requiredConfirmationsAmount;
@@ -185,10 +183,10 @@ contract CrossChainMultisig is CrossChainSender {
         for (uint256 i = 0; i < _owners.length; i++) {
             address owner = _owners[i];
             if (owner == address(0)) {
-                revert CrossChainMultisig__InvalidOwnerAddress();
+                revert PortalSig__InvalidOwnerAddress();
             }
             if (isOwner(owner)) {
-                revert CrossChainMultisig__OwnerNotUnique();
+                revert PortalSig__OwnerNotUnique();
             }
             s_isOwner[owner] = true;
             s_owners.push(owner);
@@ -200,13 +198,13 @@ contract CrossChainMultisig is CrossChainSender {
         uint256 _requiredConfirmationsAmount
     ) internal pure {
         if (_owners.length < 2) {
-            revert CrossChainMultisig__NeedAtLeastTwoOwners(_owners.length);
+            revert PortalSig__NeedAtLeastTwoOwners(_owners.length);
         }
         if (
             _requiredConfirmationsAmount < 1 ||
             _requiredConfirmationsAmount > _owners.length
         ) {
-            revert CrossChainMultisig__InvalidConfirmationAmount(
+            revert PortalSig__InvalidConfirmationAmount(
                 _requiredConfirmationsAmount
             );
         }
@@ -317,15 +315,13 @@ contract CrossChainMultisig is CrossChainSender {
     ) internal {
         (bool success, ) = _destination.call{value: _amount}(_data);
         if (!success) {
-            revert CrossChainMultisig__TransactionExecutionFailed(
-                _transactionId
-            );
+            revert PortalSig__TransactionExecutionFailed(_transactionId);
         }
     }
 
     function _ensureTransactionExists(uint256 _transactionId) internal view {
         if (_transactionId >= s_transactions.length) {
-            revert CrossChainMultisig__InvalidTransactionId(_transactionId);
+            revert PortalSig__InvalidTransactionId(_transactionId);
         }
     }
 
@@ -333,7 +329,7 @@ contract CrossChainMultisig is CrossChainSender {
         uint256 _transactionId
     ) internal view {
         if (s_transactions[_transactionId].executed) {
-            revert CrossChainMultisig__AlreadyExecuted(_transactionId);
+            revert PortalSig__AlreadyExecuted(_transactionId);
         }
     }
 
@@ -342,7 +338,7 @@ contract CrossChainMultisig is CrossChainSender {
         address _account
     ) internal view {
         if (s_isConfirmedByAccount[_transactionId][_account]) {
-            revert CrossChainMultisig__AlreadyConfirmed(_transactionId);
+            revert PortalSig__AlreadyConfirmed(_transactionId);
         }
     }
 
@@ -351,7 +347,7 @@ contract CrossChainMultisig is CrossChainSender {
         address _account
     ) internal view {
         if (!s_isConfirmedByAccount[_transactionId][_account]) {
-            revert CrossChainMultisig__NotConfirmed(_transactionId);
+            revert PortalSig__NotConfirmed(_transactionId);
         }
     }
 
@@ -362,7 +358,7 @@ contract CrossChainMultisig is CrossChainSender {
             s_transactions[_transactionId].numberOfConfirmations <
             i_requiredConfirmationsAmount
         ) {
-            revert CrossChainMultisig__NotEnoughConfirmations(_transactionId);
+            revert PortalSig__NotEnoughConfirmations(_transactionId);
         }
         return true;
     }
