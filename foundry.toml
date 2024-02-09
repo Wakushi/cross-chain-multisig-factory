@@ -4,5 +4,3 @@ out = "out"
 libs = ["lib"]
 remappings = ["@openzeppelin=lib/openzeppelin-contracts",'@chainlink/contracts-ccip/=lib/ccip/contracts/', "@chainlink/contracts=lib/chainlink/contracts", "@solmate/=lib/solmate/src/"]
 ffi = true
-
-# See more config options https://github.com/foundry-rs/foundry/tree/master/config

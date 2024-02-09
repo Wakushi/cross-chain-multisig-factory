@@ -137,11 +137,12 @@ contract Portal {
         uint256 fees = i_ccipRouter.getFee(_destinationChainSelector, message);
 
         if (_payFeesIn == PayFeesIn.LINK) {
-            if (fees > i_link.balanceOf(address(this)))
+            if (fees > i_link.balanceOf(address(this))) {
                 revert PortalSig__NotEnoughBalanceForFees(
                     i_link.balanceOf(address(this)),
                     fees
                 );
+            }
 
             i_link.approve(address(i_ccipRouter), fees);
 
@@ -153,11 +154,12 @@ contract Portal {
                 message
             );
         } else {
-            if (fees > address(this).balance)
+            if (fees > address(this).balance) {
                 revert PortalSig__NotEnoughBalanceForFees(
                     address(this).balance,
                     fees
                 );
+            }
 
             IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
             IERC20(_token).approve(address(i_ccipRouter), _amount);

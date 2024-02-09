@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.20;
+pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Portal} from "./Portal.sol";
@@ -13,6 +13,7 @@ contract PortalSig is Portal {
     struct Transaction {
         address destination;
         address token;
+        address initiator;
         uint64 destinationChainSelector;
         uint256 amount;
         uint256 numberOfConfirmations;
@@ -130,6 +131,7 @@ contract PortalSig is Portal {
         _createTransaction(
             _destination,
             _token,
+            msg.sender,
             _destinationChainSelector,
             _amount,
             _data,
@@ -213,6 +215,7 @@ contract PortalSig is Portal {
     function _createTransaction(
         address _destination,
         address _token,
+        address _initiator,
         uint64 _destinationChainSelector,
         uint256 _amount,
         bytes memory _data,
@@ -224,6 +227,7 @@ contract PortalSig is Portal {
             Transaction({
                 destination: _destination,
                 token: _token,
+                initiator: _initiator,
                 destinationChainSelector: _destinationChainSelector,
                 amount: _amount,
                 numberOfConfirmations: 0,
