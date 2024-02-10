@@ -26,8 +26,6 @@ contract Portal {
     // CCIP
     IRouterClient immutable i_ccipRouter;
     LinkTokenInterface immutable i_link;
-    mapping(uint64 chainSelector => bool isAllowlisted)
-        private allowlistedDestinationChains;
 
     // Multisig
     mapping(address account => bool isOwner) internal s_isOwner;
@@ -68,11 +66,6 @@ contract Portal {
         _;
     }
 
-    modifier onlyAllowlistedDestinationChain(uint64 _destinationChainSelector) {
-        _ensureWhiteListedChain(_destinationChainSelector);
-        _;
-    }
-
     /////////////////
     //  FUNCTIONS  //
     /////////////////
@@ -80,21 +73,6 @@ contract Portal {
     constructor(address ccipRouterAddress, address linkAddress) {
         i_ccipRouter = IRouterClient(ccipRouterAddress);
         i_link = LinkTokenInterface(linkAddress);
-    }
-
-    /////////////////
-    //   EXTERNAL  //
-    /////////////////
-
-    /// @dev Updates the allowlist status of a destination chain for transactions.
-    /// @notice This function can only be called by the owner.
-    /// @param _destinationChainSelector The selector of the destination chain to be updated.
-    /// @param allowed The allowlist status to be set for the destination chain.
-    function allowlistDestinationChain(
-        uint64 _destinationChainSelector,
-        bool allowed
-    ) external onlyOwner(msg.sender) {
-        allowlistedDestinationChains[_destinationChainSelector] = allowed;
     }
 
     /////////////////
@@ -109,11 +87,7 @@ contract Portal {
         bytes memory _data,
         PayFeesIn _payFeesIn,
         uint256 _gasLimit
-    )
-        internal
-        onlyAllowlistedDestinationChain(_destinationChainSelector)
-        returns (bytes32 messageId)
-    {
+    ) internal returns (bytes32 messageId) {
         Client.EVMTokenAmount[]
             memory tokenAmounts = new Client.EVMTokenAmount[](1);
         Client.EVMTokenAmount memory tokenAmount = Client.EVMTokenAmount({
@@ -146,7 +120,6 @@ contract Portal {
 
             i_link.approve(address(i_ccipRouter), fees);
 
-            IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
             IERC20(_token).approve(address(i_ccipRouter), _amount);
 
             messageId = i_ccipRouter.ccipSend(
@@ -161,7 +134,6 @@ contract Portal {
                 );
             }
 
-            IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
             IERC20(_token).approve(address(i_ccipRouter), _amount);
 
             messageId = i_ccipRouter.ccipSend{value: fees}(
@@ -184,12 +156,6 @@ contract Portal {
     function _ensureOwnership(address _owner) internal view {
         if (!isOwner(_owner)) {
             revert PortalSig__NotOwner(_owner);
-        }
-    }
-
-    function _ensureWhiteListedChain(uint64 _chainSelector) internal view {
-        if (!allowlistedDestinationChains[_chainSelector]) {
-            revert PortalSig__DestinationChainNotAllowlisted(_chainSelector);
         }
     }
 

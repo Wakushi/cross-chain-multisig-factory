@@ -15,9 +15,12 @@ contract PortalSig is Portal {
         address token;
         address initiator;
         uint64 destinationChainSelector;
+        uint256 id;
         uint256 amount;
         uint256 numberOfConfirmations;
         uint256 gasLimit;
+        uint256 createdAt;
+        uint256 executedAt;
         bytes data;
         bool executed;
         bool executesOnRequirementMet;
@@ -223,8 +226,10 @@ contract PortalSig is Portal {
         PayFeesIn _payFeesIn,
         uint256 _gasLimit
     ) internal {
+        uint256 transactionId = s_transactions.length;
         s_transactions.push(
             Transaction({
+                id: transactionId,
                 destination: _destination,
                 token: _token,
                 initiator: _initiator,
@@ -233,6 +238,8 @@ contract PortalSig is Portal {
                 numberOfConfirmations: 0,
                 data: _data,
                 executed: false,
+                createdAt: block.timestamp,
+                executedAt: 0,
                 executesOnRequirementMet: _executesOnRequirementMet,
                 payFeesIn: _payFeesIn,
                 gasLimit: _gasLimit
@@ -265,8 +272,8 @@ contract PortalSig is Portal {
     function _executeTransaction(uint256 _transactionId) internal {
         Transaction storage transaction = s_transactions[_transactionId];
         transaction.executed = true;
+        transaction.executedAt = block.timestamp;
         if (transaction.destinationChainSelector != 0) {
-            _ensureWhiteListedChain(transaction.destinationChainSelector);
             _sendCrossChain(
                 transaction.destinationChainSelector,
                 transaction.destination,
