@@ -4,3 +4,4 @@ out = "out"
 libs = ["lib"]
 remappings = ["@chainlink/contracts=lib/chainlink/contracts","@openzeppelin=lib/openzeppelin-contracts","@chainlink/contracts-ccip/=lib/ccip/contracts/", "@solmate/=lib/solmate/src/"]
 ffi = true
+evm_version = 'paris'

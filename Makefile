@@ -39,12 +39,19 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 	NETWORK_ARGS := --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY) -vvvv
 endif
 
+ifeq ($(findstring --network mumbai,$(ARGS)),--network mumbai)
+	NETWORK_ARGS := --rpc-url $(POLYGON_MUMBAI_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(POLYGONSCAN_API_KEY) -vvvv
+endif
+
 ifeq ($(findstring --network fuji,$(ARGS)),--network fuji)
 	NETWORK_ARGS := --rpc-url $(FUJI_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verifier-url 'https://api.routescan.io/v2/network/testnet/evm/43113/etherscan' --etherscan-api-key "verifyContract" -vvvv
 endif
 
-deploy:
+deployPortalSigFactory:
 	@forge script script/DeployPortalSigFactory.s.sol:DeployPortalSigFactory $(NETWORK_ARGS)
+
+deployPortalGate:
+	@forge script script/DeployPortalGate.s.sol:DeployPortalGate $(NETWORK_ARGS)
 
 createSubscription:
 	@forge script script/Interactions.s.sol:CreateSubscription $(NETWORK_ARGS)

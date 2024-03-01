@@ -15,7 +15,7 @@ contract HelperConfig is Script {
         address link;
         uint256 deployerKey;
         address priceFeed;
-        address router;
+        address ccipRouter;
         bytes32 donId;
     }
 
@@ -30,6 +30,8 @@ contract HelperConfig is Script {
             activeNetworkConfig = getSepoliaEthConfig();
         } else if (block.chainid == 43113) {
             activeNetworkConfig = getFujiAvaxConfig();
+        } else if (block.chainid == 80001) {
+            activeNetworkConfig = getPolygonMumbaiConfig();
         } else {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
@@ -45,8 +47,27 @@ contract HelperConfig is Script {
                 link: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
                 deployerKey: vm.envUint("PRIVATE_KEY"),
                 priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306,
-                router: 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0,
+                ccipRouter: 0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59,
                 donId: bytes32("fun-ethereum-sepolia-1")
+            });
+    }
+
+    function getPolygonMumbaiConfig()
+        public
+        view
+        returns (NetworkConfig memory)
+    {
+        return
+            NetworkConfig({
+                vrfCoordinator: 0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed,
+                gasLane: 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f,
+                subscriptionId: 0,
+                callbackGasLimit: 500000,
+                link: 0x326C977E6efc84E512bB9C30f76E30c160eD06FB,
+                deployerKey: vm.envUint("PRIVATE_KEY"),
+                priceFeed: 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada,
+                ccipRouter: 0x1035CabC275068e0F4b745A29CEDf38E13aF41b1,
+                donId: bytes32("fun-polygon-mumbai-1")
             });
     }
 
@@ -60,7 +81,7 @@ contract HelperConfig is Script {
                 link: 0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846,
                 deployerKey: vm.envUint("PRIVATE_KEY"),
                 priceFeed: 0x86d67c3D38D2bCeE722E601025C25a575021c6EA,
-                router: 0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0,
+                ccipRouter: 0xF694E193200268f9a4868e4Aa017A0118C9a8177,
                 donId: bytes32("fun-avalanche-fuji-1")
             });
     }
@@ -94,7 +115,7 @@ contract HelperConfig is Script {
                 link: address(link),
                 deployerKey: DEFAULT_ANVIL_KEY,
                 priceFeed: address(mockPriceFeed),
-                router: 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0,
+                ccipRouter: 0xb83E47C2bC239B3bf370bc41e1459A34b41238D0,
                 donId: bytes32("fun-ethereum-sepolia-1")
             });
     }

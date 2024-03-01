@@ -18,13 +18,15 @@ contract PortalSigFactory {
         address[] memory _owners,
         uint256 _requiredConfirmationsAmount,
         address _ccipRouterAddress,
-        address _linkAddress
+        address _linkAddress,
+        uint64 _portalChainSelector
     ) external {
         PortalSig portalSigWallet = new PortalSig(
             _owners,
             _requiredConfirmationsAmount,
             _ccipRouterAddress,
-            _linkAddress
+            _linkAddress,
+            _portalChainSelector
         );
         for (uint256 i = 0; i < _owners.length; i++) {
             listOfPortalSigWalletsContractsByOwner[_owners[i]].push(
