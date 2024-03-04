@@ -32,6 +32,12 @@ contract HelperConfig is Script {
             activeNetworkConfig = getFujiAvaxConfig();
         } else if (block.chainid == 80001) {
             activeNetworkConfig = getPolygonMumbaiConfig();
+        } else if (block.chainid == 11155420) {
+            activeNetworkConfig = getSepoliaOptimismConfig();
+        } else if (block.chainid == 421614) {
+            activeNetworkConfig = getSepoliaArbitrumConfig();
+        } else if (block.chainid == 84532) {
+            activeNetworkConfig = getSepoliaBaseConfig();
         } else {
             activeNetworkConfig = getOrCreateAnvilEthConfig();
         }
@@ -68,6 +74,59 @@ contract HelperConfig is Script {
                 priceFeed: 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada,
                 ccipRouter: 0x1035CabC275068e0F4b745A29CEDf38E13aF41b1,
                 donId: bytes32("fun-polygon-mumbai-1")
+            });
+    }
+
+    function getSepoliaOptimismConfig()
+        public
+        view
+        returns (NetworkConfig memory)
+    {
+        return
+            NetworkConfig({
+                vrfCoordinator: 0x0000000000000000000000000000000000000000,
+                gasLane: 0x0,
+                subscriptionId: 0,
+                callbackGasLimit: 500000,
+                link: 0xE4aB69C077896252FAFBD49EFD26B5D171A32410,
+                deployerKey: vm.envUint("PRIVATE_KEY"),
+                priceFeed: 0x61Ec26aA57019C486B10502285c5A3D4A4750AD7,
+                ccipRouter: 0x114A20A10b43D4115e5aeef7345a1A71d2a60C57,
+                donId: bytes32("unknown")
+            });
+    }
+
+    function getSepoliaArbitrumConfig()
+        public
+        view
+        returns (NetworkConfig memory)
+    {
+        return
+            NetworkConfig({
+                vrfCoordinator: 0x0000000000000000000000000000000000000000,
+                gasLane: 0x0,
+                subscriptionId: 0,
+                callbackGasLimit: 500000,
+                link: 0xb1D4538B4571d411F07960EF2838Ce337FE1E80E,
+                deployerKey: vm.envUint("PRIVATE_KEY"),
+                priceFeed: 0x0000000000000000000000000000000000000000,
+                ccipRouter: 0x2a9C5afB0d0e4BAb2BCdaE109EC4b0c4Be15a165,
+                donId: bytes32("unknown")
+            });
+    }
+
+    function getSepoliaBaseConfig() public view returns (NetworkConfig memory) {
+        return
+            NetworkConfig({
+                vrfCoordinator: 0x0000000000000000000000000000000000000000,
+                gasLane: 0x0,
+                subscriptionId: 0,
+                callbackGasLimit: 500000,
+                link: 0xE4aB69C077896252FAFBD49EFD26B5D171A32410,
+                deployerKey: vm.envUint("PRIVATE_KEY"),
+                priceFeed: 0x0000000000000000000000000000000000000000,
+                ccipRouter: 0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93,
+                donId: bytes32("unknown")
             });
     }
 

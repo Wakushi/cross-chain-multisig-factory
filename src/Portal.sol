@@ -69,20 +69,11 @@ contract Portal is CCIPReceiver {
     EnumerableMap.Bytes32ToUintMap internal s_failedMessages;
     mapping(bytes32 messageId => Client.Any2EVMMessage contents)
         public s_messageContents;
-    mapping(address portalGate => bool isAllowlisted)
-        internal s_isGateAllowlisted;
 
     string public constant CREATE_TRANSACTION_METHOD = "createTransaction";
     string public constant EXECUTE_TRANSACTION_METHOD = "executeTransaction";
     string public constant CONFIRM_TRANSACTION_METHOD = "confirmTransaction";
     string public constant REVOKE_CONFIRMATION_METHOD = "revokeConfirmation";
-
-    address public constant SEPOLIA_PORTALGATE =
-        0x223a49b390fbdf90f645D297522A7fcfC71233F8;
-    address public constant MUMBAI_PORTALGATE =
-        0x60f7b9f6f83b38e98CCAB2b594F4bABd830307Ae;
-    address public constant FUJI_PORTALGATE =
-        0xDCC0cd0d601a40382557fBA590Dc207659680a45;
 
     // Multisig
     mapping(address account => bool isOwner) internal s_isOwner;
@@ -181,16 +172,13 @@ contract Portal is CCIPReceiver {
         i_link = LinkTokenInterface(_linkAddress);
         i_portalChainSelector = _portalChainSelector;
         i_requiredConfirmationsAmount = _requiredConfirmationsAmount;
-        _allowListGates();
     }
 
     function ccipReceive(
         Client.Any2EVMMessage calldata any2EvmMessage
     ) external override onlyRouter {
         /* solhint-disable no-empty-blocks */
-        try this.processMessage(any2EvmMessage) {
-            // Intentionally empty in this example; no action needed if processMessage succeeds
-        } catch (bytes memory err) {
+        try this.processMessage(any2EvmMessage) {} catch (bytes memory err) {
             s_failedMessages.set(
                 any2EvmMessage.messageId,
                 uint256(ErrorCode.BASIC)
@@ -439,12 +427,6 @@ contract Portal is CCIPReceiver {
                 payFeesIn: payFeesIn,
                 gasLimit: gasLimit
             });
-    }
-
-    function _allowListGates() internal {
-        s_isGateAllowlisted[SEPOLIA_PORTALGATE] = true;
-        s_isGateAllowlisted[MUMBAI_PORTALGATE] = true;
-        s_isGateAllowlisted[FUJI_PORTALGATE] = true;
     }
 
     function _transferERC20Token(
